@@ -22,6 +22,15 @@ export const globalStyles = StyleSheet.create({
     fontWeight: "bold",
     color: colors.text,
   },
+  title2: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.text,
+    textAlign: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
@@ -35,7 +44,7 @@ export const globalStyles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
   },
 });
