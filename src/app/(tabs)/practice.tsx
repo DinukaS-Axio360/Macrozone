@@ -4,13 +4,13 @@ import Slider from "@react-native-community/slider";
 import Checkbox from "expo-checkbox";
 import { useState } from "react";
 import {
-    FlatList,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import CountryPicker from "react-native-country-picker-modal";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
@@ -51,6 +51,12 @@ export default function Practice() {
   const [dropdownvalue, dropdownsetValue] = useState(null);
 
   const [selected, setSelected] = useState([]);
+
+  const [fromDate, setFromDate] = useState(new Date());
+  const [toDate, setToDate] = useState(new Date());
+
+  const [showFrom, setShowFrom] = useState(false);
+  const [showTo, setShowTo] = useState(false);
 
   const filteredData = data.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase()),
@@ -247,6 +253,52 @@ export default function Practice() {
         value={selected}
         onChange={(items) => setSelected(items)}
       />
+
+      <Text style={styles.textLabel}>From Date</Text>
+
+      <Pressable style={styles.input} onPress={() => setShowFrom(true)}>
+        <Text style={{ color: colors.text }}>{fromDate.toDateString()}</Text>
+      </Pressable>
+      {showFrom && (
+        <DateTimePicker
+          value={fromDate}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowFrom(false);
+            if (selectedDate) {
+              setFromDate(selectedDate);
+            }
+          }}
+        />
+      )}
+      <Text style={styles.textLabel}>To Date</Text>
+
+      <Pressable style={styles.input} onPress={() => setShowTo(true)}>
+        <Text style={{ color: colors.text }}>{toDate.toDateString()}</Text>
+      </Pressable>
+
+      {showTo && (
+        <DateTimePicker
+          value={toDate}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowTo(false);
+            if (selectedDate && selectedDate < fromDate) {
+              alert("To date cannot be before From date");
+              return;
+            }
+            if (selectedDate) {
+              setToDate(selectedDate);
+            }
+          }}
+        />
+      )}
+
+      <Text style={styles.helper}>
+        Selected Range: {fromDate.toDateString()} → {toDate.toDateString()}
+      </Text>
     </ScrollView>
   );
 }
