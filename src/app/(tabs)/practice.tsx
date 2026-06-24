@@ -8,12 +8,21 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { Calendar } from "react-native-calendars";
+import {
+  CodeField,
+  Cursor,
+  useBlurOnFulfill,
+  useClearByFocusCell,
+} from "react-native-confirmation-code-field";
 import CountryPicker from "react-native-country-picker-modal";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
+import InputSpinner from "react-native-input-spinner";
 import { RadioButton } from "react-native-paper";
 
 export default function Practice() {
@@ -58,9 +67,89 @@ export default function Practice() {
   const [showFrom, setShowFrom] = useState(false);
   const [showTo, setShowTo] = useState(false);
 
+  const [quantity, setQuantity] = useState(1);
+
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [markedDates, setMarkedDates] = useState({});
+
+  const [error, setError] = useState("");
+
+  const [isEnabled, setIsEnabled] = useState(false);
+
+  const CELL_COUNT = 6;
+  const [otp, setOtp] = useState("");
+
+  const ref = useBlurOnFulfill({ value: otp, cellCount: CELL_COUNT });
+  const [props, getCellOnLayoutHandler] = useClearByFocusCell({
+    value: otp,
+    setValue: setOtp,
+  });
+
   const filteredData = data.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const handleDayPress = (day: any) => {
+    const selectedDate = day.dateString;
+
+    setError(""); // clear previous error
+
+    if (!startDate || (startDate && endDate)) {
+      setStartDate(selectedDate);
+      setEndDate("");
+
+      setMarkedDates({
+        [selectedDate]: {
+          startingDay: true,
+          endingDay: true,
+          color: colors.primary,
+          textColor: "white",
+        },
+      });
+
+      return;
+    }
+
+    // second click → validate order
+    const start = new Date(startDate);
+    const end = new Date(selectedDate);
+
+    if (end < start) {
+      setError("End date cannot be before start date");
+      return;
+    }
+
+    setEndDate(selectedDate);
+
+    let range: any = {};
+    let current = new Date(startDate);
+
+    while (current <= end) {
+      const date = current.toISOString().split("T")[0];
+
+      range[date] = {
+        color: colors.primary,
+        textColor: "white",
+      };
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    range[startDate] = {
+      startingDay: true,
+      color: colors.primary,
+      textColor: "white",
+    };
+
+    range[selectedDate] = {
+      endingDay: true,
+      color: colors.primary,
+      textColor: "white",
+    };
+
+    setMarkedDates(range);
+  };
 
   return (
     <ScrollView
@@ -299,6 +388,79 @@ export default function Practice() {
       <Text style={styles.helper}>
         Selected Range: {fromDate.toDateString()} → {toDate.toDateString()}
       </Text>
+
+      <Text style={styles.textLabel}>Input Spinner</Text>
+      <InputSpinner
+        style={styles.textLabel}
+        min={0}
+        max={100}
+        step={1}
+        value={quantity}
+        onChange={setQuantity}
+      />
+
+      <Text style={styles.textLabel}>Date Range</Text>
+
+      {error ? (
+        <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>
+      ) : null}
+      <Calendar
+        markingType="period"
+        markedDates={markedDates}
+        onDayPress={handleDayPress}
+      />
+
+      <Text style={styles.helper}>From: {startDate || "Not selected"}</Text>
+
+      <Text style={styles.helper}>To: {endDate || "Not selected"}</Text>
+
+      <Text style={styles.textLabel}>Enable Notifications</Text>
+
+      <View style={styles.switchRow}>
+        <Text style={{ color: colors.text }}>
+          {isEnabled ? "Enabled" : "Disabled"}
+        </Text>
+
+        <Switch
+          value={isEnabled}
+          onValueChange={setIsEnabled}
+          trackColor={{ false: "#ccc", true: colors.primary }}
+          thumbColor={isEnabled ? "#fff" : "#f4f3f4"}
+        />
+      </View>
+
+      <Text style={styles.textLabel}>OTP Verification</Text>
+
+      <CodeField
+        ref={ref}
+        {...props}
+        value={otp}
+        onChangeText={setOtp}
+        cellCount={CELL_COUNT}
+        rootStyle={{ marginTop: 16 }}
+        keyboardType="number-pad"
+        textContentType="oneTimeCode"
+        renderCell={({ index, symbol, isFocused }) => (
+          <View
+            key={index}
+            onLayout={getCellOnLayoutHandler(index)}
+            style={{
+              width: 45,
+              height: 50,
+              borderWidth: 1,
+              borderColor: isFocused ? colors.primary : "#ccc",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 8,
+              marginHorizontal: 4,
+            }}
+          >
+            <Text style={{ fontSize: 18, color: colors.text }}>
+              {symbol || (isFocused ? <Cursor /> : null)}
+            </Text>
+          </View>
+        )}
+      />
     </ScrollView>
   );
 }
