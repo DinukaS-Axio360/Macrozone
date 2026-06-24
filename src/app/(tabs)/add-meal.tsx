@@ -97,6 +97,13 @@ export default function AddMealScreen() {
       <TouchableOpacity style={styles.button} onPress={handleAddMeal}>
         <Text style={styles.buttonText}>Add Meal</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push("/check")}
+      >
+        <Text style={styles.buttonText}>Check Screen</Text>
+      </TouchableOpacity>
     </View>
   );
 }
