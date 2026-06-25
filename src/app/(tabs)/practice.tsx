@@ -3,9 +3,11 @@ import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Slider from "@react-native-community/slider";
 import Checkbox from "expo-checkbox";
+import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import {
   FlatList,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -25,6 +27,7 @@ import CountryPicker from "react-native-country-picker-modal";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 import InputSpinner from "react-native-input-spinner";
 import { RadioButton } from "react-native-paper";
+
 export default function Practice() {
   // For manually implemented searchable dropdown
   const data = [
@@ -92,6 +95,8 @@ export default function Practice() {
     item.name.toLowerCase().includes(search.toLowerCase()),
   );
 
+  const [imageUri, setImageUri] = useState<string | null>(null);
+
   const handleDayPress = (day: any) => {
     const selectedDate = day.dateString;
 
@@ -151,6 +156,25 @@ export default function Practice() {
     };
 
     setMarkedDates(range);
+  };
+
+  const pickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      alert("Permission required to access images");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
   };
 
   return (
@@ -480,6 +504,23 @@ export default function Practice() {
         />
         <Text style={styles.textLabel}>{range.join(" - ")}</Text>
       </View>
+
+      <Text style={styles.textLabel}>Profile Image</Text>
+
+      <Pressable style={styles.input} onPress={pickImage}>
+        <Text style={{ color: colors.textSecondary }}>
+          Pick Image from Gallery
+        </Text>
+      </Pressable>
+
+      {imageUri && (
+        <View style={{ marginTop: 16, alignItems: "center" }}>
+          <Image
+            source={{ uri: imageUri }}
+            style={{ width: 120, height: 120, borderRadius: 60 }}
+          />
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -657,29 +698,3 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
   },
 });
-
-{
-  /*import MultiSlider from "@ptomasroos/react-native-multi-slider";
-  
-const [range, setRange] = React.useState([5, 20]);
-
-
-<View>
-            <Text style={styles.sectionTitle}>Multi Slider</Text>
-            <View style={styles.sliderRow}>
-              <Text style={styles.helperText}>Price Range </Text>
-              <MultiSlider
-                values={range}
-                min={1}
-                max={100}
-                step={1}
-                onValuesChange={(values) => setRange(values)}
-                sliderLength={300}
-                selectedStyle={{ backgroundColor: "#31ddc4" }}
-                unselectedStyle={{ backgroundColor: "#ffffff" }}
-                markerStyle={{ backgroundColor: "#31ddc4" }}
-              />
-              <Text style={styles.dateValue}>{range.join(" - ")}</Text>
-            </View>
-          </View> */
-}
