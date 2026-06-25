@@ -1,8 +1,9 @@
 import { colors, globalStyles } from "@/styles/global";
+import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Slider from "@react-native-community/slider";
 import Checkbox from "expo-checkbox";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -24,7 +25,6 @@ import CountryPicker from "react-native-country-picker-modal";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 import InputSpinner from "react-native-input-spinner";
 import { RadioButton } from "react-native-paper";
-
 export default function Practice() {
   // For manually implemented searchable dropdown
   const data = [
@@ -79,6 +79,8 @@ export default function Practice() {
 
   const CELL_COUNT = 6;
   const [otp, setOtp] = useState("");
+
+  const [range, setRange] = React.useState([5, 20]);
 
   const ref = useBlurOnFulfill({ value: otp, cellCount: CELL_COUNT });
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({
@@ -461,6 +463,23 @@ export default function Practice() {
           </View>
         )}
       />
+
+      <Text style={styles.textLabel}>Multi Slider</Text>
+      <View>
+        <Text style={styles.textLabel}>Range </Text>
+        <MultiSlider
+          values={range}
+          min={1}
+          max={100}
+          step={1}
+          onValuesChange={(values) => setRange(values)}
+          sliderLength={300}
+          selectedStyle={{ backgroundColor: "#f0d079" }}
+          unselectedStyle={{ backgroundColor: "#ffffff" }}
+          markerStyle={{ backgroundColor: "#1d55b7" }}
+        />
+        <Text style={styles.textLabel}>{range.join(" - ")}</Text>
+      </View>
     </ScrollView>
   );
 }
@@ -638,3 +657,29 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
   },
 });
+
+{
+  /*import MultiSlider from "@ptomasroos/react-native-multi-slider";
+  
+const [range, setRange] = React.useState([5, 20]);
+
+
+<View>
+            <Text style={styles.sectionTitle}>Multi Slider</Text>
+            <View style={styles.sliderRow}>
+              <Text style={styles.helperText}>Price Range </Text>
+              <MultiSlider
+                values={range}
+                min={1}
+                max={100}
+                step={1}
+                onValuesChange={(values) => setRange(values)}
+                sliderLength={300}
+                selectedStyle={{ backgroundColor: "#31ddc4" }}
+                unselectedStyle={{ backgroundColor: "#ffffff" }}
+                markerStyle={{ backgroundColor: "#31ddc4" }}
+              />
+              <Text style={styles.dateValue}>{range.join(" - ")}</Text>
+            </View>
+          </View> */
+}
