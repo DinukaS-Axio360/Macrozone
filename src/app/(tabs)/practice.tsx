@@ -3,6 +3,7 @@ import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Slider from "@react-native-community/slider";
 import Checkbox from "expo-checkbox";
+import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import {
@@ -97,6 +98,10 @@ export default function Practice() {
 
   const [imageUri, setImageUri] = useState<string | null>(null);
 
+  const [file, setFile] = useState<DocumentPicker.DocumentPickerAsset | null>(
+    null,
+  );
+
   const handleDayPress = (day: any) => {
     const selectedDate = day.dateString;
 
@@ -174,6 +179,35 @@ export default function Practice() {
 
     if (!result.canceled) {
       setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      alert("Camera permission is required");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const pickFile = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "*/*",
+      copyToCacheDirectory: true,
+    });
+
+    if (!result.canceled) {
+      setFile(result.assets[0]);
     }
   };
 
@@ -508,17 +542,35 @@ export default function Practice() {
       <Text style={styles.textLabel}>Profile Image</Text>
 
       <Pressable style={styles.input} onPress={pickImage}>
-        <Text style={{ color: colors.textSecondary }}>
-          Pick Image from Gallery
-        </Text>
+        <Text>Pick Image from Gallery</Text>
+      </Pressable>
+
+      <Pressable style={styles.input} onPress={takePhoto}>
+        <Text>Open Camera</Text>
+      </Pressable>
+
+      <Pressable style={styles.input} onPress={pickFile}>
+        <Text>Pick File</Text>
       </Pressable>
 
       {imageUri && (
-        <View style={{ marginTop: 16, alignItems: "center" }}>
-          <Image
-            source={{ uri: imageUri }}
-            style={{ width: 120, height: 120, borderRadius: 60 }}
-          />
+        <Image
+          source={{ uri: imageUri }}
+          style={{
+            width: 120,
+            height: 120,
+            borderRadius: 60,
+            marginTop: 20,
+            alignSelf: "center",
+          }}
+        />
+      )}
+
+      {file && (
+        <View style={{ marginTop: 20 }}>
+          <Text style={styles.helper}>File Name: {file.name}</Text>
+          <Text style={styles.helper}>Size: {file.size} bytes</Text>
+          <Text style={styles.helper}>Type: {file.mimeType}</Text>
         </View>
       )}
     </ScrollView>
