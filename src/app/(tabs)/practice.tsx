@@ -1,10 +1,14 @@
 import { colors, globalStyles } from "@/styles/global";
+import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Slider from "@react-native-community/slider";
 import Checkbox from "expo-checkbox";
-import { useState } from "react";
+import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
+import React, { useState } from "react";
 import {
   FlatList,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -80,6 +84,8 @@ export default function Practice() {
   const CELL_COUNT = 6;
   const [otp, setOtp] = useState("");
 
+  const [range, setRange] = React.useState([5, 20]);
+
   const ref = useBlurOnFulfill({ value: otp, cellCount: CELL_COUNT });
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({
     value: otp,
@@ -88,6 +94,12 @@ export default function Practice() {
 
   const filteredData = data.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const [file, setFile] = useState<DocumentPicker.DocumentPickerAsset | null>(
+    null,
   );
 
   const handleDayPress = (day: any) => {
@@ -149,6 +161,54 @@ export default function Practice() {
     };
 
     setMarkedDates(range);
+  };
+
+  const pickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      alert("Permission required to access images");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      alert("Camera permission is required");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const pickFile = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "*/*",
+      copyToCacheDirectory: true,
+    });
+
+    if (!result.canceled) {
+      setFile(result.assets[0]);
+    }
   };
 
   return (
@@ -461,6 +521,58 @@ export default function Practice() {
           </View>
         )}
       />
+
+      <Text style={styles.textLabel}>Multi Slider</Text>
+      <View>
+        <Text style={styles.textLabel}>Range </Text>
+        <MultiSlider
+          values={range}
+          min={1}
+          max={100}
+          step={1}
+          onValuesChange={(values) => setRange(values)}
+          sliderLength={300}
+          selectedStyle={{ backgroundColor: "#f0d079" }}
+          unselectedStyle={{ backgroundColor: "#ffffff" }}
+          markerStyle={{ backgroundColor: "#1d55b7" }}
+        />
+        <Text style={styles.textLabel}>{range.join(" - ")}</Text>
+      </View>
+
+      <Text style={styles.textLabel}>Profile Image</Text>
+
+      <Pressable style={styles.input} onPress={pickImage}>
+        <Text>Pick Image from Gallery</Text>
+      </Pressable>
+
+      <Pressable style={styles.input} onPress={takePhoto}>
+        <Text>Open Camera</Text>
+      </Pressable>
+
+      <Pressable style={styles.input} onPress={pickFile}>
+        <Text>Pick File</Text>
+      </Pressable>
+
+      {imageUri && (
+        <Image
+          source={{ uri: imageUri }}
+          style={{
+            width: 120,
+            height: 120,
+            borderRadius: 60,
+            marginTop: 20,
+            alignSelf: "center",
+          }}
+        />
+      )}
+
+      {file && (
+        <View style={{ marginTop: 20 }}>
+          <Text style={styles.helper}>File Name: {file.name}</Text>
+          <Text style={styles.helper}>Size: {file.size} bytes</Text>
+          <Text style={styles.helper}>Type: {file.mimeType}</Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
