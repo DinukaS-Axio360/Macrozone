@@ -100,9 +100,16 @@ export default function AddMealScreen() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/check")}
+        onPress={() => router.push("/UsersScreen")}
       >
-        <Text style={styles.buttonText}>Check Screen</Text>
+        <Text style={styles.buttonText}>Users Screen</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push("/PokemonScreen")}
+      >
+        <Text style={styles.buttonText}>Pokemon Screen</Text>
       </TouchableOpacity>
     </View>
   );
