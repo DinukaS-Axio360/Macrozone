@@ -1,23 +1,21 @@
 import { colors, globalStyles } from "@/styles/global";
 import React, { useEffect } from "react";
-import {
-    ActivityIndicator,
-    FlatList,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchUsers } from "../store/slices/usersSlice";
 
 export default function UsersScreen() {
+  // Used to send actions to Redux
   const dispatch = useAppDispatch();
+
+  // Reads users state from the Redux store.
   const usersState = useAppSelector((state) => state.users);
 
   const data = usersState?.users ?? [];
   const loading = usersState?.loading ?? false;
   const error = usersState?.error ?? null;
 
+  // Fetch users when the screen loads if data is not already available.
   useEffect(() => {
     if (data.length === 0) {
       dispatch(fetchUsers());
@@ -27,14 +25,19 @@ export default function UsersScreen() {
   return (
     <View style={globalStyles.container}>
       <Text style={globalStyles.title}>Users</Text>
+
+      {/* Show loading, error, or user list based on current state */}
       {loading && data.length === 0 ? (
         <ActivityIndicator color={colors.primary} />
       ) : error ? (
         <Text style={{ color: colors.alert }}>{error}</Text>
       ) : (
         <FlatList
+          // Efficiently renders a list of users.
           data={data}
+          // Provides a unique key for each list item.
           keyExtractor={(item) => item.id.toString()}
+          // Defines how each user item should be displayed.
           renderItem={({ item }) => (
             <View
               style={{
@@ -49,6 +52,7 @@ export default function UsersScreen() {
               >
                 {item.name}
               </Text>
+
               <Text style={{ color: colors.textSecondary }}>{item.email}</Text>
             </View>
           )}
@@ -57,21 +61,3 @@ export default function UsersScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  button: {
-    padding: 12,
-    backgroundColor: "#222",
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  buttonText: { color: "#fff", textAlign: "center" },
-  card: {
-    padding: 16,
-    marginBottom: 12,
-    backgroundColor: "#f2f2f2",
-    borderRadius: 12,
-  },
-  name: { fontSize: 18, fontWeight: "bold" },
-});
